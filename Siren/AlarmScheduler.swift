@@ -13,17 +13,23 @@ final class AlarmScheduler {
     /// The alarm currently showing the in-app ringing UI. Cleared only after the mission completes or an explicit cancel.
     var alertingAlarmID: UUID?
 
-    private init() {}
+    private(set) var authorizationState: AlarmManager.AuthorizationState = .notDetermined
+
+    private init() {
+        authorizationState = manager.authorizationState
+    }
 
     func requestAuthorization() async {
-        switch manager.authorizationState {
+        refreshAuthorizationState()
+
+        switch authorizationState {
         case .authorized:
             return
         case .denied:
             return
         case .notDetermined:
             do {
-                _ = try await manager.requestAuthorization()
+                authorizationState = try await manager.requestAuthorization()
             } catch {
                 print("Failed to authorize AlarmKit: \(error)")
             }
@@ -33,6 +39,14 @@ final class AlarmScheduler {
     }
 
     func startObserving() async {
+        refreshAuthorizationState()
+
+        Task {
+            for await state in manager.authorizationUpdates {
+                authorizationState = state
+            }
+        }
+
         do {
             apply(try manager.alarms)
         } catch {
@@ -48,6 +62,10 @@ final class AlarmScheduler {
         alertingAlarmID = id
     }
 
+    func refreshAuthorizationState() {
+        authorizationState = manager.authorizationState
+    }
+
     func scheduleAlarm(for item: AlarmItem) {
         guard item.isActive else { return }
 
@@ -58,7 +76,9 @@ final class AlarmScheduler {
             let components = Calendar.current.dateComponents([.hour, .minute], from: item.time)
             guard let hour = components.hour, let minute = components.minute else { return }
 
-            let kind = item.mission.kind
+            guard let primaryKind = item.missions.first?.kind else { return }
+
+            let kind = primaryKind
             let alert = AlarmPresentation.Alert(
                 title: LocalizedStringResource("Wake Up"),
                 secondaryButton: AlarmButton(
@@ -97,25 +117,37 @@ final class AlarmScheduler {
         if alertingAlarmID == item.id {
             alertingAlarmID = nil
         }
-        do {
-            try manager.cancel(id: item.id)
-        } catch {
-            print("Failed to cancel alarm: \(error)")
-        }
+        removeFromAlarmKit(id: item.id)
     }
 
     /// Stops the system alarm only after the dismissal mission succeeds.
     func completeMission(for item: AlarmItem) {
         item.isActive = false
         alertingAlarmID = nil
+        removeFromAlarmKit(id: item.id, preferStop: true)
+    }
+
+    private func removeFromAlarmKit(id: UUID, preferStop: Bool = false) {
+        guard manager.authorizationState == .authorized else { return }
+
+        let systemAlarm: Alarm?
         do {
-            try manager.stop(id: item.id)
+            systemAlarm = try manager.alarms.first { $0.id == id }
         } catch {
-            do {
-                try manager.cancel(id: item.id)
-            } catch {
-                print("Failed to stop alarm: \(error)")
+            return
+        }
+
+        guard let systemAlarm else { return }
+
+        do {
+            if preferStop || systemAlarm.state == .alerting {
+                try manager.stop(id: id)
+            } else {
+                try manager.cancel(id: id)
             }
+        } catch {
+            // The alarm may have already been removed between lookup and mutation.
+            try? manager.cancel(id: id)
         }
     }
 

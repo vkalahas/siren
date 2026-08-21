@@ -3,6 +3,13 @@ import SwiftUI
 struct RingingView: View {
     var alarm: AlarmItem
 
+    @State private var completedMissionCount = 0
+
+    private var currentMission: DismissalMission? {
+        guard completedMissionCount < alarm.missions.count else { return nil }
+        return alarm.missions[completedMissionCount]
+    }
+
     var body: some View {
         VStack(spacing: 16) {
             Spacer()
@@ -17,14 +24,22 @@ struct RingingView: View {
                 .font(.largeTitle.bold())
                 .foregroundStyle(.red)
 
-            Text(alarm.mission.kind.challengePrompt)
-                .font(.headline)
-                .multilineTextAlignment(.center)
-
-            MissionChallengeView(mission: alarm.mission) {
-                AlarmScheduler.shared.completeMission(for: alarm)
+            if alarm.missions.count > 1 {
+                Text("Mission \(completedMissionCount + 1) of \(alarm.missions.count)")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
             }
-            .padding(.horizontal)
+
+            if let currentMission {
+                Text(currentMission.kind.challengePrompt)
+                    .font(.headline)
+                    .multilineTextAlignment(.center)
+
+                MissionChallengeView(mission: currentMission) {
+                    advanceMissionChain()
+                }
+                .padding(.horizontal)
+            }
 
             Spacer()
         }
@@ -32,5 +47,14 @@ struct RingingView: View {
         .background(Color.black.ignoresSafeArea())
         .foregroundStyle(.white)
         .interactiveDismissDisabled(true)
+    }
+
+    private func advanceMissionChain() {
+        let nextCount = completedMissionCount + 1
+        if nextCount >= alarm.missions.count {
+            AlarmScheduler.shared.completeMission(for: alarm)
+        } else {
+            completedMissionCount = nextCount
+        }
     }
 }

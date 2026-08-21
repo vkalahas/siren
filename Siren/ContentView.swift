@@ -21,7 +21,7 @@ struct ContentView: View {
                         VStack(alignment: .leading) {
                             Text(alarm.time, format: .dateTime.hour().minute())
                                 .font(.title)
-                            Text(alarm.mission.summary)
+                            Text(alarm.missions.summary)
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }

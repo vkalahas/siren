@@ -1,43 +1,28 @@
 import SwiftUI
 
-struct BarcodeMissionSetupRows: View {
-    @Binding var mission: DismissalMission?
-    @State private var isScanning = false
-
-    private var targetCode: String? {
-        if case .barcode(let code) = mission { return code }
-        return nil
-    }
+struct BarcodeTargetScanView: View {
+    var onCodeScanned: (String) -> Void
 
     var body: some View {
-        Group {
-            if let targetCode {
-                Text("Target Barcode: \(targetCode)")
-                    .foregroundStyle(.green)
-                Button("Rescan Barcode") {
-                    isScanning = true
+        VStack(spacing: 20) {
+            Text("Point your camera at the barcode you want to register.")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 20)
+
+            BarcodeCaptureView(onCodeScanned: onCodeScanned)
+                .frame(maxWidth: .infinity)
+                .frame(height: 300)
+                .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+                .overlay {
+                    RoundedRectangle(cornerRadius: 28, style: .continuous)
+                        .strokeBorder(Color.secondary.opacity(0.25), lineWidth: 1)
                 }
-            } else {
-                Button("Scan Target Barcode") {
-                    isScanning = true
-                }
-            }
+                .padding(.horizontal, 20)
         }
-        .sheet(isPresented: $isScanning) {
-            NavigationStack {
-                BarcodeCaptureView { code in
-                    mission = .barcode(targetCode: code)
-                    isScanning = false
-                }
-                .navigationTitle("Scan Target")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("Cancel") { isScanning = false }
-                    }
-                }
-            }
-        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .padding(.top, 24)
     }
 }
 
@@ -63,7 +48,7 @@ struct BarcodeMissionChallengeView: View {
                 }
             }
             .frame(maxWidth: .infinity, minHeight: 280)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
         }
     }
 }

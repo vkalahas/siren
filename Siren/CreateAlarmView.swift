@@ -6,7 +6,8 @@ struct CreateAlarmView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var time = Date()
-    @State private var mission: DismissalMission?
+    @State private var missions: [DismissalMission] = []
+    @State private var scanningMissionKind: DismissalMission.Kind?
 
     var body: some View {
         NavigationStack {
@@ -17,7 +18,10 @@ struct CreateAlarmView: View {
                         .labelsHidden()
                 }
 
-                MissionSetupView(mission: $mission)
+                MissionSetupView(
+                    missions: $missions,
+                    scanningMissionKind: $scanningMissionKind
+                )
             }
             .navigationTitle("New Alarm")
             .navigationBarTitleDisplayMode(.inline)
@@ -29,15 +33,33 @@ struct CreateAlarmView: View {
                     Button("Save") {
                         saveAlarm()
                     }
-                    .disabled(mission == nil)
+                    .disabled(missions.isEmpty)
+                }
+            }
+            .navigationDestination(item: $scanningMissionKind) { kind in
+                switch kind {
+                case .barcode:
+                    BarcodeTargetScanView { code in
+                        scanningMissionKind = nil
+                        var transaction = Transaction()
+                        transaction.disablesAnimations = true
+                        withTransaction(transaction) {
+                            missions.removeAll { $0.kind == .barcode }
+                            missions.append(.barcode(targetCode: code))
+                        }
+                    }
+                    .navigationTitle("Scan Target")
+                    .navigationBarTitleDisplayMode(.inline)
+                case .math, .shake:
+                    EmptyView()
                 }
             }
         }
     }
 
     private func saveAlarm() {
-        guard let mission else { return }
-        let newAlarm = AlarmItem(time: time, mission: mission)
+        guard !missions.isEmpty else { return }
+        let newAlarm = AlarmItem(time: time, missions: missions)
         modelContext.insert(newAlarm)
         AlarmScheduler.shared.scheduleAlarm(for: newAlarm)
         dismiss()
