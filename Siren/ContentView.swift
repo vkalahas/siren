@@ -35,8 +35,19 @@ struct ContentView: View {
             await scheduler.startObserving()
         }
         .onChange(of: scenePhase) { _, newPhase in
-            guard newPhase == .active else { return }
-            scheduler.refreshAuthorizationState()
+            switch newPhase {
+            case .active:
+                scheduler.refreshAuthorizationState()
+                if scheduler.alertingAlarmID != nil {
+                    AlarmRinger.shared.start()
+                }
+            case .background, .inactive:
+                if scheduler.alertingAlarmID != nil {
+                    AlarmRinger.shared.start()
+                }
+            @unknown default:
+                break
+            }
         }
     }
 

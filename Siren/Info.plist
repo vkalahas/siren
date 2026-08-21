@@ -4,5 +4,9 @@
 <dict>
 	<key>NSAlarmKitUsageDescription</key>
 	<string>Siren schedules alarms that can wake you even in Silent mode, then requires a mission to dismiss them.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+	</array>
 </dict>
 </plist>

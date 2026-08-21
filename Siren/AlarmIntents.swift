@@ -1,8 +1,6 @@
 import AlarmKit
 import AppIntents
 
-nonisolated struct EmptyAlarmMetadata: AlarmMetadata {}
-
 /// Opens Siren so the user can complete the alarm's dismissal mission.
 struct OpenAlarmIntent: LiveActivityIntent {
     static var title: LocalizedStringResource = "Complete mission"
@@ -22,7 +20,7 @@ struct OpenAlarmIntent: LiveActivityIntent {
 
     func perform() async throws -> some IntentResult {
         if let id = UUID(uuidString: alarmID) {
-            await AlarmScheduler.shared.presentRinging(id: id)
+            await AlarmScheduler.shared.handleSystemAlarmInteraction(for: id)
         }
         return .result()
     }

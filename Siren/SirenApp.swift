@@ -1,8 +1,11 @@
 import SwiftUI
 import SwiftData
+import UserNotifications
 
 @main
 struct SirenApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             AlarmItem.self,
@@ -21,5 +24,17 @@ struct SirenApp: App {
             ContentView()
         }
         .modelContainer(sharedModelContainer)
+    }
+}
+
+final class AppDelegate: NSObject, UIApplicationDelegate {
+    private let notificationHandler = NotificationResponseHandler()
+
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
+    ) -> Bool {
+        UNUserNotificationCenter.current().delegate = notificationHandler
+        return true
     }
 }
