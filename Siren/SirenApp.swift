@@ -1,10 +1,3 @@
-//
-//  SirenApp.swift
-//  Siren
-//
-//  Created by Vik Kalahasthi on 8/21/26.
-//
-
 import SwiftUI
 import SwiftData
 
@@ -12,7 +5,7 @@ import SwiftData
 struct SirenApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            AlarmItem.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
