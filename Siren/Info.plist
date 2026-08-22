@@ -4,5 +4,7 @@
 <dict>
 	<key>NSAlarmKitUsageDescription</key>
 	<string>Siren schedules alarms that can wake you even in Silent mode, then requires a mission to dismiss them.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>Siren uses device motion to count shakes during alarm dismissal missions.</string>
 </dict>
 </plist>

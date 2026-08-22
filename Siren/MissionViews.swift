@@ -38,8 +38,9 @@ struct MissionSetupView: View {
         switch kind {
         case .barcode:
             scanningMissionKind = .barcode
-        case .math, .shake:
-            break
+        case .shake:
+            missions.removeAll { $0.kind == .shake }
+            missions.append(.shake(requiredShakes: ShakeMissionDefaults.requiredShakes))
         }
     }
 }
@@ -142,6 +143,8 @@ struct MissionChallengeView: View {
         switch mission {
         case .barcode(let targetCode):
             BarcodeMissionChallengeView(targetCode: targetCode, onComplete: onComplete)
+        case .shake(let requiredShakes):
+            ShakeMissionChallengeView(requiredShakes: requiredShakes, onComplete: onComplete)
         }
     }
 }

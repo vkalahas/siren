@@ -2,14 +2,14 @@ import Foundation
 
 /// A dismissal challenge that must be completed before an alarm can stop.
 ///
-/// Add new cases (math, shake, and so on) here and in the matching setup/challenge views.
+/// Add new cases here and in the matching setup/challenge views.
 /// Do not put mission-specific fields on `AlarmItem`.
 nonisolated enum DismissalMission: Codable, Hashable, Sendable {
     case barcode(targetCode: String)
+    case shake(requiredShakes: Int)
 
     nonisolated enum Kind: String, Codable, CaseIterable, Identifiable, Hashable, Sendable {
         case barcode
-        case math
         case shake
 
         var id: String { rawValue }
@@ -17,7 +17,6 @@ nonisolated enum DismissalMission: Codable, Hashable, Sendable {
         var title: String {
             switch self {
             case .barcode: "Barcode"
-            case .math: "Math"
             case .shake: "Shake"
             }
         }
@@ -25,7 +24,6 @@ nonisolated enum DismissalMission: Codable, Hashable, Sendable {
         var subtitle: String {
             switch self {
             case .barcode: "Scan a code"
-            case .math: "Solve problems"
             case .shake: "Shake to wake"
             }
         }
@@ -33,22 +31,19 @@ nonisolated enum DismissalMission: Codable, Hashable, Sendable {
         var systemImage: String {
             switch self {
             case .barcode: "barcode.viewfinder"
-            case .math: "function"
             case .shake: "iphone.radiowaves.left.and.right"
             }
         }
 
         var isAvailable: Bool {
             switch self {
-            case .barcode: true
-            case .math, .shake: false
+            case .barcode, .shake: true
             }
         }
 
         var challengePrompt: String {
             switch self {
             case .barcode: "Scan the registered barcode to dismiss."
-            case .math: "Solve the math problem to dismiss."
             case .shake: "Shake your phone to dismiss."
             }
         }
@@ -56,7 +51,6 @@ nonisolated enum DismissalMission: Codable, Hashable, Sendable {
         var alarmButtonTitle: String {
             switch self {
             case .barcode: "Scan"
-            case .math: "Solve"
             case .shake: "Shake"
             }
         }
@@ -65,13 +59,21 @@ nonisolated enum DismissalMission: Codable, Hashable, Sendable {
     var kind: Kind {
         switch self {
         case .barcode: .barcode
+        case .shake: .shake
         }
     }
 
     var summary: String {
         switch self {
         case .barcode(let targetCode):
-            "Barcode: \(targetCode)"
+            return "Barcode: \(targetCode)"
+        case .shake(let requiredShakes):
+            let count = max(1, requiredShakes)
+            return "Shake: \(count) \(count == 1 ? "shake" : "shakes")"
         }
     }
+}
+
+enum ShakeMissionDefaults {
+    static let requiredShakes = 15
 }

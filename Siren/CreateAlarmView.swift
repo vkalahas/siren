@@ -50,7 +50,7 @@ struct CreateAlarmView: View {
                     }
                     .navigationTitle("Scan Target")
                     .navigationBarTitleDisplayMode(.inline)
-                case .math, .shake:
+                case .shake:
                     EmptyView()
                 }
             }
