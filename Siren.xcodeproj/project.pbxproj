@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		4FE4C1843038EE2600C8CECB /* SirenWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 4FE4C17F3038EE2600C8CECB /* SirenWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		4FE4C1333038EE2600C8CECB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -29,6 +33,20 @@
 			remoteInfo = SirenWidgetExtension;
 		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		4FE4C1833038EE2600C8CECB /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				4FE4C1843038EE2600C8CECB /* SirenWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		4FE4C1233038EE2500C8CECB /* Siren.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Siren.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -87,30 +105,6 @@
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
-
-/* Begin PBXCopyFilesBuildPhase section */
-		4FE4C1833038EE2600C8CECB /* Embed Foundation Extensions */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 13;
-			files = (
-				4FE4C1843038EE2600C8CECB /* SirenWidgetExtension.appex in Embed Foundation Extensions */,
-			);
-			name = "Embed Foundation Extensions";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
-/* Begin PBXBuildFile section */
-		4FE4C1843038EE2600C8CECB /* SirenWidgetExtension.appex in Embed Foundation Extensions */ = {
-			isa = PBXBuildFile;
-			fileRef = 4FE4C17F3038EE2600C8CECB /* SirenWidgetExtension.appex */;
-			settings = {
-				ATTRIBUTES = (RemoveHeadersOnCopy, );
-			};
-		};
-/* End PBXBuildFile section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		4FE4C1203038EE2500C8CECB /* Frameworks */ = {
@@ -254,8 +248,8 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				4FE4C1823038EE2600C8CECB /* SirenWidget */,
 				4FE4C1813038EE2600C8CECB /* Shared */,
+				4FE4C1823038EE2600C8CECB /* SirenWidget */,
 			);
 			name = SirenWidgetExtension;
 			packageProductDependencies = (

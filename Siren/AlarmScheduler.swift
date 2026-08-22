@@ -142,7 +142,6 @@ final class AlarmScheduler {
     private func beginMissionSession(for id: UUID) {
         pendingMissionIDs.insert(id)
         alertingAlarmID = id
-        AlarmRinger.shared.start()
     }
 
     private func endMissionSession(for id: UUID) {
@@ -153,10 +152,6 @@ final class AlarmScheduler {
 
         if alertingAlarmID == id {
             alertingAlarmID = nil
-        }
-
-        if pendingMissionIDs.isEmpty {
-            AlarmRinger.shared.stop()
         }
     }
 

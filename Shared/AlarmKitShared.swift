@@ -7,6 +7,7 @@ nonisolated struct EmptyAlarmMetadata: AlarmMetadata {}
 enum AlarmEnforcement {
     static let reAlertDelay: TimeInterval = 1
     static let reAlertDebounce: TimeInterval = 0.4
-    static let notificationBurstCount = 30
-    static let notificationBurstInterval: TimeInterval = 2
+    /// Short backup burst if the app cannot re-alert via AlarmKit (e.g. after force-quit).
+    static let notificationBackupCount = 5
+    static let notificationBackupInterval: TimeInterval = 30
 }

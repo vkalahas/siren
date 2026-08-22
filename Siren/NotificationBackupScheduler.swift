@@ -1,7 +1,7 @@
 import Foundation
 import UserNotifications
 
-/// Staggered local notifications that keep firing until the mission is completed or the alarm is cancelled.
+/// A small set of staggered local notifications as a fallback when AlarmKit cannot re-alert (e.g. app force-quit).
 @MainActor
 final class NotificationBackupScheduler {
     static let shared = NotificationBackupScheduler()
@@ -12,7 +12,7 @@ final class NotificationBackupScheduler {
         let center = UNUserNotificationCenter.current()
         let settings = await center.notificationSettings()
         guard settings.authorizationStatus == .notDetermined else { return }
-        _ = try? await center.requestAuthorization(options: [.alert, .sound, .badge])
+        _ = try? await center.requestAuthorization(options: [.alert, .sound])
     }
 
     func scheduleBackup(for item: AlarmItem) {
@@ -41,12 +41,11 @@ final class NotificationBackupScheduler {
 
         let content = UNMutableNotificationContent()
         content.title = "Siren"
-        content.body = "Complete your mission to dismiss the alarm."
+        content.body = "Your alarm is still active. Open Siren to complete your mission."
         content.sound = .default
-        content.interruptionLevel = .timeSensitive
 
-        for index in 0..<AlarmEnforcement.notificationBurstCount {
-            let offsetSeconds = index * Int(AlarmEnforcement.notificationBurstInterval)
+        for index in 0..<AlarmEnforcement.notificationBackupCount {
+            let offsetSeconds = index * Int(AlarmEnforcement.notificationBackupInterval)
             guard let fireDate = Calendar.current.date(
                 byAdding: .second,
                 value: offsetSeconds,
@@ -70,7 +69,7 @@ final class NotificationBackupScheduler {
     }
 
     private func notificationIDs(for alarmID: UUID) -> [String] {
-        (0..<AlarmEnforcement.notificationBurstCount).map { index in
+        (0..<AlarmEnforcement.notificationBackupCount).map { index in
             "siren.backup.\(alarmID.uuidString).\(index)"
         }
     }
