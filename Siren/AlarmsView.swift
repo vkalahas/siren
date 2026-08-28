@@ -46,18 +46,12 @@ struct AlarmsView: View {
                 .onDelete(perform: deleteAlarms)
             }
             .contentMargins(.top, 16, for: .scrollContent)
+            .safeAreaPadding(.bottom, 80)
             .navigationTitle("Alarms")
-            .safeAreaInset(edge: .bottom, spacing: 0) {
-                Button("Add New Alarm") {
+            .overlay(alignment: .bottomTrailing) {
+                FloatingActionButton {
                     showingCreateAlarm = true
                 }
-                .buttonStyle(.glassProminent)
-                .buttonSizing(.flexible)
-                .controlSize(.extraLarge)
-                .tint(.blue)
-                .padding(.top, 12)
-                .padding(.horizontal, 20)
-                .padding(.bottom, 28)
             }
             .sheet(isPresented: $showingCreateAlarm) {
                 CreateAlarmView()
