@@ -24,9 +24,13 @@ struct AlarmsView: View {
                                     .font(.title)
                                     .foregroundStyle(.primary)
                                     .strikethrough(alarm.showsStrikethroughTime)
-                                Text(alarm.missions.summary)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    ForEach(alarm.missions, id: \.self) { mission in
+                                        Text("\(mission.summary)")
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                }
                             }
                         }
                         .buttonStyle(.plain)
