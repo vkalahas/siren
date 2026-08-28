@@ -6,6 +6,7 @@ struct CreateAlarmView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var time = Date()
+    @State private var repeatWeekdays = WeekdaySchedule.allWeekdays
     @State private var missions: [DismissalMission] = []
     @State private var scanningMissionKind: DismissalMission.Kind?
 
@@ -17,6 +18,8 @@ struct CreateAlarmView: View {
                         .datePickerStyle(.wheel)
                         .labelsHidden()
                 }
+
+                RepeatScheduleView(repeatWeekdays: $repeatWeekdays)
 
                 MissionSetupView(
                     missions: $missions,
@@ -59,7 +62,7 @@ struct CreateAlarmView: View {
 
     private func saveAlarm() {
         guard !missions.isEmpty else { return }
-        let newAlarm = AlarmItem(time: time, missions: missions)
+        let newAlarm = AlarmItem(time: time, missions: missions, repeatWeekdays: repeatWeekdays)
         modelContext.insert(newAlarm)
         AlarmScheduler.shared.scheduleAlarm(for: newAlarm)
         dismiss()

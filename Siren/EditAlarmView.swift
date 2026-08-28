@@ -6,10 +6,12 @@ struct EditAlarmView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var time: Date
+    @State private var repeatWeekdays: [Int]
 
     init(alarm: AlarmItem) {
         self.alarm = alarm
         _time = State(initialValue: alarm.time)
+        _repeatWeekdays = State(initialValue: alarm.repeatWeekdays)
     }
 
     var body: some View {
@@ -20,6 +22,8 @@ struct EditAlarmView: View {
                         .datePickerStyle(.wheel)
                         .labelsHidden()
                 }
+
+                RepeatScheduleView(repeatWeekdays: $repeatWeekdays)
 
                 Section("Dismissal Missions") {
                     Text(alarm.missions.summary)
@@ -50,6 +54,7 @@ struct EditAlarmView: View {
 
         alarm.clearSkipState()
         alarm.time = time
+        alarm.repeatWeekdays = repeatWeekdays
 
         if wasActive {
             AlarmScheduler.shared.scheduleAlarm(for: alarm)

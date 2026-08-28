@@ -125,16 +125,11 @@ final class AlarmScheduler {
             let schedule: Alarm.Schedule
             let baseFireDate: Date
 
-            if let fireDate {
-                schedule = .fixed(fireDate)
-                baseFireDate = fireDate
+            if let scheduleResult = makeSchedule(for: item, hour: hour, minute: minute, fireDate: fireDate) {
+                schedule = scheduleResult.schedule
+                baseFireDate = scheduleResult.baseFireDate
             } else {
-                guard let nextOccurrence = item.nextOccurrence() else { return }
-                schedule = Alarm.Schedule.relative(.init(
-                    time: .init(hour: hour, minute: minute),
-                    repeats: .never
-                ))
-                baseFireDate = nextOccurrence
+                return
             }
 
             let configuration = makeConfiguration(for: snapshot, schedule: schedule)
@@ -198,11 +193,36 @@ final class AlarmScheduler {
     /// Stops the system alarm only after the dismissal mission succeeds.
     func completeMission(for item: AlarmItem) {
         authorizedStopIDs.insert(item.id)
-        item.isActive = false
         endMissionSession(for: item.id)
-        configurationSnapshots.removeValue(forKey: item.id)
         cancelStackedEnforcement(for: item.id)
+
+        if item.isRepeating {
+            removeFromAlarmKit(id: item.id, preferStop: true)
+            return
+        }
+
+        item.isActive = false
+        configurationSnapshots.removeValue(forKey: item.id)
         removeFromAlarmKit(id: item.id, preferStop: true)
+    }
+
+    private func makeSchedule(
+        for item: AlarmItem,
+        hour: Int,
+        minute: Int,
+        fireDate: Date?
+    ) -> (schedule: Alarm.Schedule, baseFireDate: Date)? {
+        let time = Alarm.Schedule.Relative.Time(hour: hour, minute: minute)
+
+        if let fireDate {
+            return (schedule: .fixed(fireDate), baseFireDate: fireDate)
+        }
+
+        guard let nextOccurrence = item.nextOccurrence() else { return nil }
+
+        let recurrence = item.alarmKitRecurrence
+        let schedule = Alarm.Schedule.relative(.init(time: time, repeats: recurrence))
+        return (schedule: schedule, baseFireDate: nextOccurrence)
     }
 
     private func beginMissionSession(for id: UUID) {

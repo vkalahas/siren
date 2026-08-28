@@ -5,6 +5,7 @@
 //  Created by Vik Kalahasthi on 8/21/26.
 //
 
+import AlarmKit
 import Foundation
 import Testing
 @testable import Siren
@@ -137,6 +138,67 @@ struct SirenTests {
         let expected = calendar.date(from: DateComponents(year: 2026, month: 8, day: 29, hour: 7, minute: 30))!
 
         #expect(reschedule == expected)
+    }
+
+    @Test
+    func nextOccurrenceRespectsPartialWeekdays() {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC")!
+
+        let reference = calendar.date(from: DateComponents(year: 2026, month: 8, day: 25, hour: 6, minute: 0))!
+        let alarmTime = calendar.date(from: DateComponents(year: 2020, month: 1, day: 1, hour: 7, minute: 30))!
+        let alarm = AlarmItem(
+            time: alarmTime,
+            missions: [.shake(requiredShakes: 3)],
+            repeatWeekdays: [4, 6]
+        )
+
+        let next = alarm.nextOccurrence(from: reference, calendar: calendar)
+        let expected = calendar.date(from: DateComponents(year: 2026, month: 8, day: 26, hour: 7, minute: 30))!
+
+        #expect(next == expected)
+    }
+
+    @Test
+    func nextOccurrenceAfterSkipJumpsToNextRepeatDay() {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC")!
+
+        let reference = calendar.date(from: DateComponents(year: 2026, month: 8, day: 24, hour: 6, minute: 0))!
+        let alarmTime = calendar.date(from: DateComponents(year: 2020, month: 1, day: 1, hour: 7, minute: 30))!
+        let alarm = AlarmItem(
+            time: alarmTime,
+            missions: [.shake(requiredShakes: 3)],
+            repeatWeekdays: [2, 4, 6]
+        )
+
+        let reschedule = alarm.rescheduleDateAfterSkip(from: reference, calendar: calendar)
+        let expected = calendar.date(from: DateComponents(year: 2026, month: 8, day: 26, hour: 7, minute: 30))!
+
+        #expect(reschedule == expected)
+    }
+
+    @Test
+    func oneShotAlarmHasNoRepeatDays() {
+        let alarm = AlarmItem(time: .now, missions: [.shake(requiredShakes: 1)], repeatWeekdays: [])
+        #expect(!alarm.isRepeating)
+    }
+
+    @Test
+    func alarmKitRecurrenceMapsWeekdays() {
+        let recurrence = WeekdaySchedule.alarmKitRecurrence(for: [2, 4, 6])
+        if case .weekly(let weekdays) = recurrence {
+            #expect(weekdays == [.monday, .wednesday, .friday])
+        } else {
+            Issue.record("Expected weekly recurrence")
+        }
+
+        let oneShot = WeekdaySchedule.alarmKitRecurrence(for: [])
+        if case .never = oneShot {
+            #expect(Bool(true))
+        } else {
+            Issue.record("Expected never recurrence")
+        }
     }
 
     @Test
