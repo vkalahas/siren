@@ -57,4 +57,35 @@ struct SirenTests {
 
         #expect(mission.summary == "Shake: 1 shake")
     }
+
+    @Test
+    func stackAlarmIDIsStableAndDistinctPerIndex() {
+        let parent = UUID(uuidString: "A1B2C3D4-E5F6-7890-ABCD-EF1234567890")!
+        let first = AlarmEnforcement.stackAlarmID(parent: parent, index: 0)
+        let second = AlarmEnforcement.stackAlarmID(parent: parent, index: 1)
+        let firstAgain = AlarmEnforcement.stackAlarmID(parent: parent, index: 0)
+
+        #expect(first == firstAgain)
+        #expect(first != second)
+    }
+
+    @Test
+    func parentAlarmIDRoundTripsForStackIndices() {
+        let parent = UUID(uuidString: "12345678-1234-5678-1234-567812345678")!
+
+        for index in 0..<AlarmEnforcement.stackAlarmCount {
+            let stackID = AlarmEnforcement.stackAlarmID(parent: parent, index: index)
+            let resolved = AlarmEnforcement.parentAlarmID(fromStackID: stackID, knownParents: [parent])
+
+            #expect(resolved == parent)
+        }
+    }
+
+    @Test
+    func parentAlarmIDReturnsNilForUnknownStackID() {
+        let unknown = UUID(uuidString: "00000000-0000-4000-8000-000000000001")!
+        let parent = UUID(uuidString: "12345678-1234-5678-1234-567812345678")!
+
+        #expect(AlarmEnforcement.parentAlarmID(fromStackID: unknown, knownParents: [parent]) == nil)
+    }
 }

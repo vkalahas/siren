@@ -86,6 +86,22 @@ final class AlarmScheduler {
         authorizationState = manager.authorizationState
     }
 
+    /// Rebuilds cached alarm configuration for active alarms after relaunch.
+    func registerActiveAlarms(_ items: [AlarmItem]) {
+        for item in items where item.isActive {
+            guard let primaryKind = item.missions.first?.kind else { continue }
+            let components = Calendar.current.dateComponents([.hour, .minute], from: item.time)
+            guard let hour = components.hour, let minute = components.minute else { continue }
+
+            configurationSnapshots[item.id] = AlarmConfigurationSnapshot(
+                id: item.id,
+                hour: hour,
+                minute: minute,
+                primaryKind: primaryKind
+            )
+        }
+    }
+
     func scheduleAlarm(for item: AlarmItem) {
         guard item.isActive else { return }
 
@@ -114,7 +130,7 @@ final class AlarmScheduler {
 
             do {
                 _ = try await manager.schedule(id: item.id, configuration: configuration)
-                NotificationBackupScheduler.shared.scheduleBackup(for: item)
+                await scheduleStackedEnforcement(for: item, snapshot: snapshot)
             } catch {
                 print("Failed to schedule alarm: \(error)")
             }
@@ -125,7 +141,7 @@ final class AlarmScheduler {
         authorizedStopIDs.insert(item.id)
         endMissionSession(for: item.id)
         configurationSnapshots.removeValue(forKey: item.id)
-        NotificationBackupScheduler.shared.cancelBackup(for: item.id)
+        cancelStackedEnforcement(for: item.id)
         removeFromAlarmKit(id: item.id)
     }
 
@@ -135,7 +151,7 @@ final class AlarmScheduler {
         item.isActive = false
         endMissionSession(for: item.id)
         configurationSnapshots.removeValue(forKey: item.id)
-        NotificationBackupScheduler.shared.cancelBackup(for: item.id)
+        cancelStackedEnforcement(for: item.id)
         removeFromAlarmKit(id: item.id, preferStop: true)
     }
 
@@ -193,6 +209,49 @@ final class AlarmScheduler {
             secondaryIntent: openIntent,
             sound: .default
         )
+    }
+
+    private func scheduleStackedEnforcement(
+        for item: AlarmItem,
+        snapshot: AlarmConfigurationSnapshot
+    ) async {
+        for index in 0..<AlarmEnforcement.stackAlarmCount {
+            let offset = TimeInterval(index + 1) * AlarmEnforcement.stackAlarmInterval
+            let fireDate = item.time.addingTimeInterval(offset)
+
+            let stackID = AlarmEnforcement.stackAlarmID(parent: item.id, index: index)
+            let schedule = Alarm.Schedule.fixed(fireDate)
+            let configuration = makeConfiguration(for: snapshot, schedule: schedule)
+
+            do {
+                _ = try await manager.schedule(id: stackID, configuration: configuration)
+            } catch AlarmManager.AlarmError.maximumLimitReached {
+                print("Failed to schedule stacked alarm: maximum AlarmKit limit reached")
+                break
+            } catch {
+                print("Failed to schedule stacked alarm: \(error)")
+            }
+        }
+    }
+
+    private func cancelStackedEnforcement(for parentID: UUID) {
+        for index in 0..<AlarmEnforcement.stackAlarmCount {
+            let stackID = AlarmEnforcement.stackAlarmID(parent: parentID, index: index)
+            removeFromAlarmKit(id: stackID)
+        }
+    }
+
+    private func resolvedParentID(for systemID: UUID) -> UUID {
+        if configurationSnapshots[systemID] != nil {
+            return systemID
+        }
+
+        let knownParents = Array(Set(configurationSnapshots.keys).union(pendingMissionIDs))
+        if let parentID = AlarmEnforcement.parentAlarmID(fromStackID: systemID, knownParents: knownParents) {
+            return parentID
+        }
+
+        return systemID
     }
 
     private func scheduleReAlert(for id: UUID) {
@@ -256,12 +315,13 @@ final class AlarmScheduler {
 
     private func apply(_ alarms: [Alarm]) {
         let alertingIDs = Set(alarms.filter { $0.state == .alerting }.map(\.id))
+        let normalizedAlertingIDs = Set(alertingIDs.map { resolvedParentID(for: $0) })
 
-        for id in alertingIDs {
+        for id in normalizedAlertingIDs {
             beginMissionSession(for: id)
         }
 
-        let prematurelyStopped = pendingMissionIDs.subtracting(alertingIDs)
+        let prematurelyStopped = pendingMissionIDs.subtracting(normalizedAlertingIDs)
         for id in prematurelyStopped where !authorizedStopIDs.contains(id) {
             scheduleReAlert(for: id)
         }

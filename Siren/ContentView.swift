@@ -32,6 +32,7 @@ struct ContentView: View {
         }
         .task {
             await scheduler.requestAuthorization()
+            scheduler.registerActiveAlarms(alarms)
             await scheduler.startObserving()
         }
         .onChange(of: scenePhase) { _, newPhase in
