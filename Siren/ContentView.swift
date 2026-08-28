@@ -22,6 +22,7 @@ struct ContentView: View {
                 SettingsView()
             }
         }
+        .appAccentColor()
         .safeAreaInset(edge: .top, spacing: 0) {
             AlarmPermissionBanner(state: scheduler.authorizationState)
         }
