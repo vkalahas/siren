@@ -32,12 +32,14 @@ struct ContentView: View {
         }
         .task {
             await scheduler.requestAuthorization()
+            scheduler.clearExpiredSkips(for: alarms)
             scheduler.registerActiveAlarms(alarms)
             await scheduler.startObserving()
         }
         .onChange(of: scenePhase) { _, newPhase in
             guard newPhase == .active else { return }
             scheduler.refreshAuthorizationState()
+            scheduler.clearExpiredSkips(for: alarms)
         }
     }
 

@@ -93,4 +93,61 @@ struct SirenTests {
 
         #expect(AlarmEnforcement.parentAlarmID(fromStackID: unknown, knownParents: [parent]) == nil)
     }
+
+    @Test
+    func nextOccurrenceReturnsTodayWhenTimeIsLaterToday() {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC")!
+
+        let reference = calendar.date(from: DateComponents(year: 2026, month: 8, day: 28, hour: 6, minute: 0))!
+        let alarmTime = calendar.date(from: DateComponents(year: 2020, month: 1, day: 1, hour: 7, minute: 30))!
+        let alarm = AlarmItem(time: alarmTime, missions: [.shake(requiredShakes: 3)])
+
+        let next = alarm.nextOccurrence(from: reference, calendar: calendar)
+        let expected = calendar.date(from: DateComponents(year: 2026, month: 8, day: 28, hour: 7, minute: 30))!
+
+        #expect(next == expected)
+    }
+
+    @Test
+    func nextOccurrenceReturnsTomorrowWhenTimeAlreadyPassedToday() {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC")!
+
+        let reference = calendar.date(from: DateComponents(year: 2026, month: 8, day: 28, hour: 8, minute: 0))!
+        let alarmTime = calendar.date(from: DateComponents(year: 2020, month: 1, day: 1, hour: 7, minute: 30))!
+        let alarm = AlarmItem(time: alarmTime, missions: [.shake(requiredShakes: 3)])
+
+        let next = alarm.nextOccurrence(from: reference, calendar: calendar)
+        let expected = calendar.date(from: DateComponents(year: 2026, month: 8, day: 29, hour: 7, minute: 30))!
+
+        #expect(next == expected)
+    }
+
+    @Test
+    func rescheduleDateAfterSkipIsOneDayAfterNextOccurrence() {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC")!
+
+        let reference = calendar.date(from: DateComponents(year: 2026, month: 8, day: 28, hour: 6, minute: 0))!
+        let alarmTime = calendar.date(from: DateComponents(year: 2020, month: 1, day: 1, hour: 7, minute: 30))!
+        let alarm = AlarmItem(time: alarmTime, missions: [.shake(requiredShakes: 3)])
+
+        let reschedule = alarm.rescheduleDateAfterSkip(from: reference, calendar: calendar)
+        let expected = calendar.date(from: DateComponents(year: 2026, month: 8, day: 29, hour: 7, minute: 30))!
+
+        #expect(reschedule == expected)
+    }
+
+    @Test
+    func showsStrikethroughTimeWhenInactiveOrSkipped() {
+        let inactiveAlarm = AlarmItem(time: .now, isActive: false, missions: [.shake(requiredShakes: 1)])
+        #expect(inactiveAlarm.showsStrikethroughTime)
+
+        let activeAlarm = AlarmItem(time: .now, isActive: true, missions: [.shake(requiredShakes: 1)])
+        #expect(!activeAlarm.showsStrikethroughTime)
+
+        activeAlarm.isSkippedOnce = true
+        #expect(activeAlarm.showsStrikethroughTime)
+    }
 }

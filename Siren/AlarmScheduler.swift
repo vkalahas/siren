@@ -102,7 +102,7 @@ final class AlarmScheduler {
         }
     }
 
-    func scheduleAlarm(for item: AlarmItem) {
+    func scheduleAlarm(for item: AlarmItem, fireDate: Date? = nil) {
         guard item.isActive else { return }
 
         Task {
@@ -122,17 +122,67 @@ final class AlarmScheduler {
             configurationSnapshots[item.id] = snapshot
             authorizedStopIDs.remove(item.id)
 
-            let schedule = Alarm.Schedule.relative(.init(
-                time: .init(hour: hour, minute: minute),
-                repeats: .never
-            ))
+            let schedule: Alarm.Schedule
+            let baseFireDate: Date
+
+            if let fireDate {
+                schedule = .fixed(fireDate)
+                baseFireDate = fireDate
+            } else {
+                guard let nextOccurrence = item.nextOccurrence() else { return }
+                schedule = Alarm.Schedule.relative(.init(
+                    time: .init(hour: hour, minute: minute),
+                    repeats: .never
+                ))
+                baseFireDate = nextOccurrence
+            }
+
             let configuration = makeConfiguration(for: snapshot, schedule: schedule)
 
             do {
                 _ = try await manager.schedule(id: item.id, configuration: configuration)
-                await scheduleStackedEnforcement(for: item, snapshot: snapshot)
+                await scheduleStackedEnforcement(
+                    snapshot: snapshot,
+                    baseFireDate: baseFireDate,
+                    parentID: item.id
+                )
             } catch {
                 print("Failed to schedule alarm: \(error)")
+            }
+        }
+    }
+
+    func skipAlarmOnce(for item: AlarmItem) {
+        guard item.isActive, !item.isSkippedOnce else { return }
+        guard let nextOccurrence = item.nextOccurrence() else { return }
+        guard let rescheduleDate = item.rescheduleDateAfterSkip() else { return }
+
+        item.isSkippedOnce = true
+        item.skippedOccurrenceDate = nextOccurrence
+
+        cancelAlarm(for: item)
+        scheduleAlarm(for: item, fireDate: rescheduleDate)
+    }
+
+    func unskipAlarm(for item: AlarmItem) {
+        guard item.isActive, item.isSkippedOnce else { return }
+
+        item.clearSkipState()
+        cancelAlarm(for: item)
+        scheduleAlarm(for: item)
+    }
+
+    func clearExpiredSkips(for items: [AlarmItem]) {
+        let now = Date()
+
+        for item in items where item.isSkippedOnce {
+            guard let skippedDate = item.skippedOccurrenceDate, skippedDate <= now else { continue }
+
+            item.clearSkipState()
+
+            if item.isActive {
+                cancelAlarm(for: item)
+                scheduleAlarm(for: item)
             }
         }
     }
@@ -212,14 +262,15 @@ final class AlarmScheduler {
     }
 
     private func scheduleStackedEnforcement(
-        for item: AlarmItem,
-        snapshot: AlarmConfigurationSnapshot
+        snapshot: AlarmConfigurationSnapshot,
+        baseFireDate: Date,
+        parentID: UUID
     ) async {
         for index in 0..<AlarmEnforcement.stackAlarmCount {
             let offset = TimeInterval(index + 1) * AlarmEnforcement.stackAlarmInterval
-            let fireDate = item.time.addingTimeInterval(offset)
+            let fireDate = baseFireDate.addingTimeInterval(offset)
 
-            let stackID = AlarmEnforcement.stackAlarmID(parent: item.id, index: index)
+            let stackID = AlarmEnforcement.stackAlarmID(parent: parentID, index: index)
             let schedule = Alarm.Schedule.fixed(fireDate)
             let configuration = makeConfiguration(for: snapshot, schedule: schedule)
 

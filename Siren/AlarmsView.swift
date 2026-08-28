@@ -8,6 +8,8 @@ struct AlarmsView: View {
     @State private var scheduler = AlarmScheduler.shared
     @State private var showingCreateAlarm = false
     @State private var editingAlarm: AlarmItem?
+    @State private var alarmPendingSkip: AlarmItem?
+    @State private var alarmPendingUnskip: AlarmItem?
 
     var body: some View {
         NavigationStack {
@@ -21,6 +23,7 @@ struct AlarmsView: View {
                                 Text(alarm.time, format: .dateTime.hour().minute())
                                     .font(.title)
                                     .foregroundStyle(.primary)
+                                    .strikethrough(alarm.showsStrikethroughTime)
                                 Text(alarm.missions.summary)
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
@@ -30,17 +33,41 @@ struct AlarmsView: View {
 
                         Spacer()
 
-                        Toggle("", isOn: Binding(
-                            get: { alarm.isActive },
-                            set: { newValue in
-                                alarm.isActive = newValue
-                                if newValue {
-                                    scheduler.scheduleAlarm(for: alarm)
-                                } else {
-                                    scheduler.cancelAlarm(for: alarm)
-                                }
+                        HStack(spacing: 12) {
+                            if alarm.isActive {
+                                GlassCircleButton(
+                                    icon: "forward.fill",
+                                    size: 36,
+                                    iconSize: 14,
+                                    backgroundColor: alarm.isSkippedOnce ? .red : .accentColor,
+                                    action: {
+                                        if alarm.isSkippedOnce {
+                                            alarmPendingUnskip = alarm
+                                        } else {
+                                            alarmPendingSkip = alarm
+                                        }
+                                    }
+                                )
+                                .accessibilityLabel(alarm.isSkippedOnce ? "Unskip" : "Skip Once")
                             }
-                        ))
+
+                            Toggle(isOn: Binding(
+                                get: { alarm.isActive },
+                                set: { newValue in
+                                    alarm.isActive = newValue
+                                    if newValue {
+                                        alarm.clearSkipState()
+                                        scheduler.scheduleAlarm(for: alarm)
+                                    } else {
+                                        scheduler.cancelAlarm(for: alarm)
+                                    }
+                                }
+                            )) {
+                                EmptyView()
+                            }
+                            .labelsHidden()
+                        }
+                        .fixedSize()
                     }
                 }
                 .onDelete(perform: deleteAlarms)
@@ -58,6 +85,44 @@ struct AlarmsView: View {
             }
             .sheet(item: $editingAlarm) { alarm in
                 EditAlarmView(alarm: alarm)
+            }
+            .alert(
+                "Skip Alarm Once?",
+                isPresented: Binding(
+                    get: { alarmPendingSkip != nil },
+                    set: { if !$0 { alarmPendingSkip = nil } }
+                )
+            ) {
+                Button("Skip Once") {
+                    if let alarm = alarmPendingSkip {
+                        scheduler.skipAlarmOnce(for: alarm)
+                    }
+                    alarmPendingSkip = nil
+                }
+                Button("Cancel", role: .cancel) {
+                    alarmPendingSkip = nil
+                }
+            } message: {
+                Text("This alarm won't ring at its next scheduled time.")
+            }
+            .alert(
+                "Unskip Alarm?",
+                isPresented: Binding(
+                    get: { alarmPendingUnskip != nil },
+                    set: { if !$0 { alarmPendingUnskip = nil } }
+                )
+            ) {
+                Button("Unskip") {
+                    if let alarm = alarmPendingUnskip {
+                        scheduler.unskipAlarm(for: alarm)
+                    }
+                    alarmPendingUnskip = nil
+                }
+                Button("Cancel", role: .cancel) {
+                    alarmPendingUnskip = nil
+                }
+            } message: {
+                Text("This alarm will ring at its next scheduled time.")
             }
         }
     }

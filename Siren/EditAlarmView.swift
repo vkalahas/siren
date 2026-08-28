@@ -48,6 +48,7 @@ struct EditAlarmView: View {
             AlarmScheduler.shared.cancelAlarm(for: alarm)
         }
 
+        alarm.clearSkipState()
         alarm.time = time
 
         if wasActive {
