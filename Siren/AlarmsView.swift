@@ -45,6 +45,7 @@ struct AlarmsView: View {
                 }
                 .onDelete(perform: deleteAlarms)
             }
+            .contentMargins(.top, 16, for: .scrollContent)
             .navigationTitle("Alarms")
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 Button("Add New Alarm") {

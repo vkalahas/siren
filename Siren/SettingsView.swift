@@ -8,6 +8,7 @@ struct SettingsView: View {
             Form {
                 Toggle("Advanced Mode", isOn: $advancedModeEnabled)
             }
+            .contentMargins(.top, 16, for: .scrollContent)
             .navigationTitle("Settings")
         }
     }
