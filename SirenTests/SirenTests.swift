@@ -59,6 +59,11 @@ struct SirenTests {
     }
 
     @Test
+    func lostBarcodeFallbackRequiresFiveHundredShakes() {
+        #expect(BarcodeMissionDefaults.lostBarcodeFallbackShakes == 500)
+    }
+
+    @Test
     func stackAlarmIDIsStableAndDistinctPerIndex() {
         let parent = UUID(uuidString: "A1B2C3D4-E5F6-7890-ABCD-EF1234567890")!
         let first = AlarmEnforcement.stackAlarmID(parent: parent, index: 0)

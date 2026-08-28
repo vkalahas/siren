@@ -31,8 +31,17 @@ struct BarcodeMissionChallengeView: View {
     let onComplete: () -> Void
 
     @State private var mismatchMessage: String?
+    @State private var isUsingLostBarcodeFallback = false
 
     var body: some View {
+        if isUsingLostBarcodeFallback {
+            lostBarcodeFallbackContent
+        } else {
+            barcodeScanContent
+        }
+    }
+
+    private var barcodeScanContent: some View {
         VStack(spacing: 12) {
             if let mismatchMessage {
                 Text(mismatchMessage)
@@ -49,6 +58,27 @@ struct BarcodeMissionChallengeView: View {
             }
             .frame(maxWidth: .infinity, minHeight: 280)
             .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+
+            Button("I lost my barcode, help!") {
+                isUsingLostBarcodeFallback = true
+            }
+            .buttonStyle(.borderless)
+            .foregroundStyle(.secondary)
+            .padding(.top, 4)
+        }
+    }
+
+    private var lostBarcodeFallbackContent: some View {
+        VStack(spacing: 12) {
+            Text("Can't find your barcode? Shake \(BarcodeMissionDefaults.lostBarcodeFallbackShakes) times to dismiss.")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+
+            ShakeMissionChallengeView(
+                requiredShakes: BarcodeMissionDefaults.lostBarcodeFallbackShakes,
+                onComplete: onComplete
+            )
         }
     }
 }

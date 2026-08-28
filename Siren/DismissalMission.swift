@@ -77,3 +77,7 @@ nonisolated enum DismissalMission: Codable, Hashable, Sendable {
 enum ShakeMissionDefaults {
     static let requiredShakes = 15
 }
+
+enum BarcodeMissionDefaults {
+    static let lostBarcodeFallbackShakes = 500
+}
