@@ -7,19 +7,26 @@ struct AlarmsView: View {
 
     @State private var scheduler = AlarmScheduler.shared
     @State private var showingCreateAlarm = false
+    @State private var editingAlarm: AlarmItem?
 
     var body: some View {
         NavigationStack {
             List {
                 ForEach(alarms) { alarm in
                     HStack {
-                        VStack(alignment: .leading) {
-                            Text(alarm.time, format: .dateTime.hour().minute())
-                                .font(.title)
-                            Text(alarm.missions.summary)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+                        Button {
+                            editingAlarm = alarm
+                        } label: {
+                            VStack(alignment: .leading) {
+                                Text(alarm.time, format: .dateTime.hour().minute())
+                                    .font(.title)
+                                    .foregroundStyle(.primary)
+                                Text(alarm.missions.summary)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
                         }
+                        .buttonStyle(.plain)
 
                         Spacer()
 
@@ -53,6 +60,9 @@ struct AlarmsView: View {
             }
             .sheet(isPresented: $showingCreateAlarm) {
                 CreateAlarmView()
+            }
+            .sheet(item: $editingAlarm) { alarm in
+                EditAlarmView(alarm: alarm)
             }
         }
     }
