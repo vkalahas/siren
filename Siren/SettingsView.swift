@@ -50,6 +50,17 @@ struct SettingsView: View {
                         }
                     }
                 }
+
+                Section("Open Source") {
+                    Link(destination: URL(string: "https://github.com/vkalahas/siren")!) {
+                        HStack {
+                            Text("GitHub")
+                            Spacer()
+                            Image(systemName: "arrow.up.right.square")
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
             }
             .contentMargins(.top, 16, for: .scrollContent)
             .navigationTitle("Settings")
