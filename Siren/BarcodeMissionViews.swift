@@ -59,11 +59,17 @@ struct BarcodeMissionChallengeView: View {
             .frame(maxWidth: .infinity, minHeight: 280)
             .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
 
-            Button("I lost my barcode, help!") {
+            Button {
                 isUsingLostBarcodeFallback = true
+            } label: {
+                Text("I lost my barcode, help!")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .background(Color(.tertiarySystemFill), in: Capsule())
             }
-            .buttonStyle(.borderless)
-            .foregroundStyle(.secondary)
+            .buttonStyle(.plain)
             .padding(.top, 4)
         }
     }
