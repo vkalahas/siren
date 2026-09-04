@@ -74,6 +74,14 @@ struct AlarmsView: View {
                         }
                         .fixedSize()
                     }
+                    .swipeActions(edge: .leading) {
+                        Button {
+                            editingAlarm = alarm
+                        } label: {
+                            Label("Edit", systemImage: "pencil")
+                        }
+                        .tint(.accentColor)
+                    }
                 }
                 .onDelete(perform: deleteAlarms)
             }
