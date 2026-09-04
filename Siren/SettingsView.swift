@@ -6,6 +6,7 @@ struct SettingsView: View {
     @AppStorage(AccentColorSettings.redKey) private var accentColorRed = 0.0
     @AppStorage(AccentColorSettings.greenKey) private var accentColorGreen = 0.0
     @AppStorage(AccentColorSettings.blueKey) private var accentColorBlue = 0.0
+    @AppStorage(AlarmSettings.barcodeWarningEnabledKey) private var barcodeWarningEnabled = true
 
     @State private var showingAccentColorPicker = false
     @State private var draftAccentColor = AccentColorSettings.systemAccent
@@ -49,6 +50,14 @@ struct SettingsView: View {
                             .accessibilityLabel("Choose accent color")
                         }
                     }
+                }
+
+                Section {
+                    Toggle("Barcode Warning", isOn: $barcodeWarningEnabled)
+                } header: {
+                    Text("Alarms")
+                } footer: {
+                    Text("Shows a reminder when saving an alarm without a barcode mission.")
                 }
 
                 Section("Open Source") {

@@ -5,10 +5,17 @@ struct CreateAlarmView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 
+    @AppStorage(AlarmSettings.barcodeWarningEnabledKey) private var barcodeWarningEnabled = true
+
     @State private var time = Date()
     @State private var repeatWeekdays = WeekdaySchedule.allWeekdays
     @State private var missions: [DismissalMission] = []
     @State private var scanningMissionKind: DismissalMission.Kind?
+    @State private var showingBarcodeWarning = false
+
+    private var hasBarcodeMission: Bool {
+        missions.contains { $0.kind == .barcode }
+    }
 
     var body: some View {
         NavigationStack {
@@ -34,10 +41,18 @@ struct CreateAlarmView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
-                        saveAlarm()
+                        attemptSave()
                     }
                     .disabled(missions.isEmpty)
                 }
+            }
+            .alert("Skip Barcode Mission?", isPresented: $showingBarcodeWarning) {
+                Button("Wait, I'll add the barcode mission") {}
+                Button("I'll get up, don't worry") {
+                    saveAlarm()
+                }
+            } message: {
+                Text("Without the barcode mission, you probably won't actually get up when you need to.")
             }
             .navigationDestination(item: $scanningMissionKind) { kind in
                 switch kind {
@@ -58,6 +73,15 @@ struct CreateAlarmView: View {
                 }
             }
         }
+    }
+
+    private func attemptSave() {
+        guard !missions.isEmpty else { return }
+        if !hasBarcodeMission && barcodeWarningEnabled {
+            showingBarcodeWarning = true
+            return
+        }
+        saveAlarm()
     }
 
     private func saveAlarm() {
