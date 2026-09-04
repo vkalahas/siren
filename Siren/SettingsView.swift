@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct SettingsView: View {
+    @AppStorage(DisplaySettings.leftHandedKey) private var isLeftHanded = false
     @AppStorage(AccentColorSettings.usesCustomKey) private var usesCustomAccentColor = false
     @AppStorage(AccentColorSettings.redKey) private var accentColorRed = 0.0
     @AppStorage(AccentColorSettings.greenKey) private var accentColorGreen = 0.0
@@ -13,6 +14,8 @@ struct SettingsView: View {
         NavigationStack {
             Form {
                 Section("Appearance") {
+                    Toggle("Left-Handed Mode", isOn: $isLeftHanded)
+
                     HStack {
                         Text("Accent Color")
 

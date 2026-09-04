@@ -4,6 +4,7 @@ import SwiftData
 struct AlarmsView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \AlarmItem.time) private var alarms: [AlarmItem]
+    @AppStorage(DisplaySettings.leftHandedKey) private var isLeftHanded = false
 
     @State private var scheduler = AlarmScheduler.shared
     @State private var showingCreateAlarm = false
@@ -79,7 +80,7 @@ struct AlarmsView: View {
             .contentMargins(.top, 16, for: .scrollContent)
             .safeAreaPadding(.bottom, 80)
             .navigationTitle("Alarms")
-            .overlay(alignment: .bottomTrailing) {
+            .overlay(alignment: isLeftHanded ? .bottomLeading : .bottomTrailing) {
                 FloatingActionButton {
                     showingCreateAlarm = true
                 }
