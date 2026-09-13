@@ -32,6 +32,7 @@ struct BarcodeMissionChallengeView: View {
 
     @State private var mismatchMessage: String?
     @State private var isUsingLostBarcodeFallback = false
+    @State private var scanAttempt = 0
 
     var body: some View {
         if isUsingLostBarcodeFallback {
@@ -54,8 +55,10 @@ struct BarcodeMissionChallengeView: View {
                     onComplete()
                 } else {
                     mismatchMessage = "Wrong barcode. Try again."
+                    scanAttempt += 1
                 }
             }
+            .id(scanAttempt)
             .frame(maxWidth: .infinity, minHeight: 280)
             .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
 
