@@ -516,13 +516,14 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = T3QLJB7ANQ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Siren/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Siren: Annoying Alarm";
 				INFOPLIST_KEY_CFBundleName = SirenAlarm;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				INFOPLIST_KEY_NSCameraUsageDescription = "We need camera access to scan barcodes for alarms.";
 				INFOPLIST_KEY_NSMotionUsageDescription = "Siren uses device motion to count shakes during alarm dismissal missions.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -535,7 +536,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.vk.Siren;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vk.SirenAnnoyingAlarm;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
@@ -553,13 +554,14 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DEVELOPMENT_TEAM = T3QLJB7ANQ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Siren/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Siren: Annoying Alarm";
 				INFOPLIST_KEY_CFBundleName = SirenAlarm;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.lifestyle";
 				INFOPLIST_KEY_NSCameraUsageDescription = "We need camera access to scan barcodes for alarms.";
 				INFOPLIST_KEY_NSMotionUsageDescription = "Siren uses device motion to count shakes during alarm dismissal missions.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -572,7 +574,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.vk.Siren;
+				PRODUCT_BUNDLE_IDENTIFIER = com.vk.SirenAnnoyingAlarm;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
