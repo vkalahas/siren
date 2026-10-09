@@ -24,7 +24,7 @@ enum WeekdaySchedule {
     return .weekly(weekdays)
   }
 
-  private static func localeWeekday(from calendarWeekday: Int) -> Locale.Weekday? {
+  nonisolated private static func localeWeekday(from calendarWeekday: Int) -> Locale.Weekday? {
     switch calendarWeekday {
     case 1: .sunday
     case 2: .monday

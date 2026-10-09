@@ -664,7 +664,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = T3QLJB7ANQ;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SirenWidget/Info.plist;
@@ -692,7 +692,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = T3QLJB7ANQ;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = SirenWidget/Info.plist;
